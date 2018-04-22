@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.example.ewang.helloworld.helper.MyApplication;
+import com.example.ewang.helloworld.helper.ResponseWrapper;
 import com.example.ewang.helloworld.model.User;
 import com.example.ewang.helloworld.helper.JsonHelper;
 
@@ -81,14 +82,27 @@ public class LoginActivity extends AppCompatActivity {
                                     .build();
                             Response response = okHttpClient.newCall(request).execute();
                             String data = response.body().string();
-                            User currentUser = JsonHelper.decode(data, User.class);
+                            ResponseWrapper responseWrapper = JsonHelper.decode(data, ResponseWrapper.class);
 
-                            SharedPreferences.Editor editor = getSharedPreferences("user", MODE_PRIVATE).edit();
-                            editor.putString("account", currentUser.getAccount());
-                            editor.putString("password", currentUser.getPassword());
-                            editor.apply();
+                            if (responseWrapper.isSuccess()) {
+                                User currentUser = (User) responseWrapper.getReturnVal();
+                                SharedPreferences.Editor editor = getSharedPreferences("user", MODE_PRIVATE).edit();
+                                editor.putString("account", currentUser.getAccount());
+                                editor.putString("password", currentUser.getPassword());
+                                editor.apply();
 
-                            MyApplication.setCurrentUser(currentUser);
+                                MyApplication.setCurrentUser(currentUser);
+
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Intent intent = new Intent(LoginActivity.this, ShowFriendsActivity.class);
+                                        startActivity(intent);
+                                    }
+                                });
+                            } else {
+                                //TODO 弹出警告
+                            }
 
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -96,8 +110,6 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
 
-                Intent intent = new Intent(LoginActivity.this, ShowFriendsActivity.class);
-                startActivity(intent);
 
             }
         });
