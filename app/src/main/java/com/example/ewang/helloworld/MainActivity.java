@@ -10,8 +10,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     static final int request_login = 0;
     static final int request_reg = 1;
-    //不能写为127.0.0.1
-    static final String basicUrl = "http://10.151.38.74:8080";
+    //不能写为127.0.0.1,你自己的本机IP地址
+    static final String basicUrl = "http://10.150.2.26:8080";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

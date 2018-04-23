@@ -9,10 +9,24 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.example.ewang.helloworld.adapter.MsgAdapter;
+import com.example.ewang.helloworld.helper.JsonHelper;
+import com.example.ewang.helloworld.helper.MyApplication;
+import com.example.ewang.helloworld.helper.ResponseWrapper;
+import com.example.ewang.helloworld.model.Message;
 import com.example.ewang.helloworld.model.Msg;
+import com.example.ewang.helloworld.model.User;
+import com.fasterxml.jackson.core.type.TypeReference;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class SessionActivity extends AppCompatActivity {
 
@@ -31,8 +45,44 @@ public class SessionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session);
+        long toUserId = getIntent().getLongExtra("toUserId", 0);
 
-        initMsg();
+        final User user = MyApplication.getCurrentUser();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                OkHttpClient client = new OkHttpClient();
+                RequestBody requestBody = new FormBody.Builder()
+                        .add("userId", String.valueOf(user.getId()))
+                        .add("toUserId", String.valueOf(toUserId))
+                        .build();
+                Request request = new Request.Builder()
+                        .url(MainActivity.basicUrl + "/session/message/get")
+                        .post(requestBody)
+                        .build();
+                try {
+                    Response response = client.newCall(request).execute();
+                    String data = response.body().string();
+                    ResponseWrapper responseWrapper = JsonHelper.decode(data, ResponseWrapper.class);
+                    Map<String, Object> dataMap = responseWrapper.getData();
+                    List<Message> messageList = JsonHelper.decode(JsonHelper.encode(dataMap.get("messageList")), new TypeReference<List<Message>>() {
+                    });
+
+                    for (Message m : messageList) {
+                        if (m.getUserId() == user.getId()) {
+                            msgList.add(new Msg(m.getContent(), Msg.TYPE_SENT));
+                        } else if (m.getToUserId() == user.getId()) {
+                            msgList.add(new Msg(m.getContent(), Msg.TYPE_RECEIVED));
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }).start();
+
         editText = findViewById(R.id.input_text);
         sendBtn = findViewById(R.id.btn_send);
         msgRecyclerView = findViewById(R.id.msg_recycler_view);
@@ -49,6 +99,33 @@ public class SessionActivity extends AppCompatActivity {
                 if (content.isEmpty()) {
                     return;
                 }
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        OkHttpClient client = new OkHttpClient();
+                        RequestBody requestBody = new FormBody.Builder()
+                                .add("content", content)
+                                .add("userId", String.valueOf(user.getId()))
+                                .add("toUserId", String.valueOf(toUserId))
+                                .build();
+                        Request request = new Request.Builder()
+                                .url(MainActivity.basicUrl + "/session/message/send")
+                                .post(requestBody)
+                                .build();
+                        ResponseWrapper responseWrapper = new ResponseWrapper("requesting");
+                        while (!responseWrapper.isSuccess()) {
+                            Response response = null;
+                            try {
+                                response = client.newCall(request).execute();
+                                String data = response.body().string();
+                                responseWrapper = JsonHelper.decode(data, ResponseWrapper.class);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    }
+                }).start();
                 Msg msg = new Msg(content, Msg.TYPE_SENT);
                 msgList.add(msg);
                 adapter.notifyItemInserted(msgList.size() - 1);
@@ -59,9 +136,5 @@ public class SessionActivity extends AppCompatActivity {
         });
     }
 
-    private void initMsg() {
-        msgList.add(new Msg(("我是阿汪，请求添加你为好友"), Msg.TYPE_SENT));
-        msgList.add(new Msg("我通过了你的好友验证，现在我们可以开始聊天了", Msg.TYPE_RECEIVED));
-    }
 
 }

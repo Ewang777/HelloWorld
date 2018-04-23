@@ -1,5 +1,6 @@
 package com.example.ewang.helloworld.adapter;
 
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.ewang.helloworld.R;
+import com.example.ewang.helloworld.SessionActivity;
 import com.example.ewang.helloworld.model.Message;
 import com.example.ewang.helloworld.model.Msg;
 import com.example.ewang.helloworld.model.User;
@@ -33,12 +35,14 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
+        View friendView;
         TextView textUsername;
         TextView textLatestTime;
         TextView textLatestMsg;
 
         public ViewHolder(View itemView) {
             super(itemView);
+            friendView = itemView;
             textUsername = itemView.findViewById(R.id.text_username);
             textLatestMsg = itemView.findViewById(R.id.text_latestMsg);
             textLatestTime = itemView.findViewById(R.id.text_latestTime);
@@ -49,7 +53,18 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.friend_item, parent, false);
-        return new ViewHolder(view);
+        ViewHolder viewHolder = new ViewHolder(view);
+        viewHolder.friendView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(v.getContext(), SessionActivity.class);
+                int position = viewHolder.getAdapterPosition();
+                User user = userList.get(position);
+                intent.putExtra("toUserId", user.getId());
+                v.getContext().startActivity(intent);
+            }
+        });
+        return viewHolder;
     }
 
     @Override
