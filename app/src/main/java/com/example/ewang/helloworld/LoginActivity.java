@@ -1,5 +1,6 @@
 package com.example.ewang.helloworld;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -70,9 +71,13 @@ public class LoginActivity extends AppCompatActivity {
                 judgeParameters(account, password);
 
 
+                ProgressDialog progressDialog = DialogHelper.showProgressDialog(LoginActivity.this, "请稍侯", "loading", null);
+
                 Thread loginThread = new Thread(new Runnable() {
                     @Override
                     public void run() {
+
+
                         try {
                             OkHttpClient okHttpClient = new OkHttpClient();
                             RequestBody requestBody = new FormBody.Builder()
@@ -90,11 +95,7 @@ public class LoginActivity extends AppCompatActivity {
                             if (responseWrapper.isSuccess()) {
                                 Map<String, Object> userMap = (Map<String, Object>) responseWrapper.getData().get("user");
 
-                                User currentUser = new User((Long.parseLong(userMap.get("id") + "")),
-                                        (String) userMap.get("account"),
-                                        (String) userMap.get("password"),
-                                        (String) userMap.get("username"),
-                                        new Date((long) userMap.get("createTime")));
+                                User currentUser = JsonHelper.decode(JsonHelper.encode(userMap), User.class);
                                 SharedPreferences.Editor editor = getSharedPreferences("user", MODE_PRIVATE).edit();
                                 editor.putString("account", currentUser.getAccount());
                                 editor.putString("password", currentUser.getPassword());
@@ -107,25 +108,34 @@ public class LoginActivity extends AppCompatActivity {
                                     public void run() {
                                         Intent intent = new Intent(LoginActivity.this, ShowFriendsActivity.class);
                                         startActivity(intent);
+                                        progressDialog.dismiss();
                                         finish();
                                     }
                                 });
                             } else {
-                                DialogHelper.showAlertDialog(LoginActivity.this, "Warning", responseWrapper.getErrMessage(), null, null);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        DialogHelper.showAlertDialog(LoginActivity.this, "Warning", responseWrapper.getErrMessage(), null, null);
+                                        progressDialog.dismiss();
+                                    }
+                                });
                             }
 
                         } catch (IOException e) {
                             e.printStackTrace();
-                            DialogHelper.showAlertDialog(LoginActivity.this, "Warning", "登录异常", null, null);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    DialogHelper.showAlertDialog(LoginActivity.this, "Warning", "登录异常", null, null);
+                                    progressDialog.dismiss();
+                                }
+                            });
                         }
                     }
                 });
 
                 loginThread.start();
-
-                DialogHelper.showProgressDialog(LoginActivity.this, "请稍后", "loading", (dialogInterface -> {
-                    loginThread.stop();
-                }));
 
 
             }

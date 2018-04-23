@@ -1,5 +1,8 @@
 package com.example.ewang.helloworld.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Date;
 
 /**
@@ -17,12 +20,17 @@ public class User {
 
     private final Date createTime;
 
-    public User(long id, String account, String password, String username, Date createTime) {
+    @JsonCreator
+    public User(@JsonProperty("id") long id,
+                @JsonProperty("account") String account,
+                @JsonProperty("password") String password,
+                @JsonProperty("username") String username,
+                @JsonProperty("createTime") long createTime) {
         this.id = id;
         this.account = account;
         this.password = password;
         this.username = username;
-        this.createTime = createTime;
+        this.createTime = new Date(createTime);
     }
 
     public long getId() {

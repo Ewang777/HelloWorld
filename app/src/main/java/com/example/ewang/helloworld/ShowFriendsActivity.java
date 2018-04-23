@@ -13,8 +13,12 @@ import com.example.ewang.helloworld.helper.MyApplication;
 import com.example.ewang.helloworld.helper.ResponseWrapper;
 import com.example.ewang.helloworld.model.Message;
 import com.example.ewang.helloworld.model.User;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +45,9 @@ public class ShowFriendsActivity extends AppCompatActivity {
         TextView usernameTextView = findViewById(R.id.text_current_username);
         usernameTextView.setText(usernameTextView.getText() + user.getUsername());
 
+        LinearLayoutManager layoutManager = new LinearLayoutManager(ShowFriendsActivity.this);
+        friendRecyclerView.setLayoutManager(layoutManager);
+
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -58,10 +65,20 @@ public class ShowFriendsActivity extends AppCompatActivity {
                     ResponseWrapper responseWrapper = JsonHelper.decode(data, ResponseWrapper.class);
                     if (responseWrapper.isSuccess()) {
                         Map<String, Object> dataMap = responseWrapper.getData();
-                        List<User> userList = (List<User>) dataMap.get("userList");
-                        Map<Long, Message> messageMap = (Map<Long, Message>) dataMap.get("messageMap");
+                        List<User> userList = JsonHelper.decode(
+                                JsonHelper.encode(dataMap.get("userList")), new TypeReference<List<User>>() {
+                                });
+                        Map<Long, Message> messageMap = JsonHelper.decode(
+                                JsonHelper.encode(dataMap.get("messageMap")), new TypeReference<Map<Long, Message>>() {
+                                });
 
                         adapter = new FriendAdapter(userList, messageMap);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                friendRecyclerView.setAdapter(adapter);
+                            }
+                        });
                     } else {
                         DialogHelper.showAlertDialog(ShowFriendsActivity.this, "Warning", responseWrapper.getErrMessage(), null, null);
                     }
@@ -71,10 +88,5 @@ public class ShowFriendsActivity extends AppCompatActivity {
                 }
             }
         }).start();
-
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        friendRecyclerView.setLayoutManager(layoutManager);
-        friendRecyclerView.setAdapter(adapter);
-
     }
 }

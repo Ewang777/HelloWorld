@@ -60,8 +60,8 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         Message message = latestMessageMap.get(user.getId());
         if (message != null) {
             String content = message.getContent();
-            if (content.length() > 40) {
-                content = content.substring(0, 40) + "...";
+            if (content.length() > 20) {
+                content = content.substring(0, 20) + "...";
             }
             holder.textLatestMsg.setText(content);
 

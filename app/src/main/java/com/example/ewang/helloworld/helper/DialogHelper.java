@@ -16,9 +16,9 @@ import java.util.function.Function;
  */
 
 public class DialogHelper {
-    public static void showAlertDialog(Context context, String title, String message,
-                                       DialogInterface.OnClickListener onPositiveClickListener,
-                                       DialogInterface.OnClickListener onNegativeClickListener) {
+    public static AlertDialog.Builder showAlertDialog(Context context, String title, String message,
+                                                      DialogInterface.OnClickListener onPositiveClickListener,
+                                                      DialogInterface.OnClickListener onNegativeClickListener) {
         AlertDialog.Builder warnDialog = new AlertDialog.Builder(context);
         warnDialog.setTitle(title);
         warnDialog.setMessage(message);
@@ -28,18 +28,18 @@ public class DialogHelper {
             warnDialog.setNegativeButton("取消", onNegativeClickListener);
         }
         warnDialog.show();
-
+        return warnDialog;
     }
 
-    public static void showProgressDialog(Context context, String title, String message, ProgressDialog.OnCancelListener onCancelListener) {
+    public static ProgressDialog showProgressDialog(Context context, String title, String message, ProgressDialog.OnCancelListener onCancelListener) {
         ProgressDialog progressDialog = new ProgressDialog(context);
         progressDialog.setTitle(title);
         progressDialog.setMessage(message);
         if (onCancelListener != null) {
             progressDialog.setCancelable(true);
             progressDialog.setOnCancelListener(onCancelListener);
-            progressDialog.show();
-
         }
+        progressDialog.show();
+        return progressDialog;
     }
 }

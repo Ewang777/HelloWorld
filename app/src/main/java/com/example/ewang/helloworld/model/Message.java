@@ -1,5 +1,8 @@
 package com.example.ewang.helloworld.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Date;
 
 /**
@@ -19,13 +22,19 @@ public class Message {
 
     private final Date createTime;
 
-    public Message(long id, long userId, long toUserId, String content, long sessionId, Date createTime) {
+    @JsonCreator
+    public Message(@JsonProperty("id") long id,
+                   @JsonProperty("userId") long userId,
+                   @JsonProperty("toUserId") long toUserId,
+                   @JsonProperty("content") String content,
+                   @JsonProperty("sessionId") long sessionId,
+                   @JsonProperty("createTime") long createTime) {
         this.id = id;
         this.userId = userId;
         this.toUserId = toUserId;
         this.content = content;
         this.sessionId = sessionId;
-        this.createTime = createTime;
+        this.createTime = new Date(createTime);
     }
 
     public long getId() {

@@ -1,5 +1,8 @@
 package com.example.ewang.helloworld.helper;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,16 +16,21 @@ public class ResponseWrapper {
 
     private final String errMessage;
 
-    private final Map<String, Object> data = new HashMap<>();
+    private final Map<String, Object> data;
 
-    public ResponseWrapper() {
-        this.success = true;
-        this.errMessage = null;
+    @JsonCreator
+    public ResponseWrapper(@JsonProperty("success") boolean success,
+                           @JsonProperty("errMessage") String errMessage,
+                           @JsonProperty("data") Map<String, Object> data) {
+        this.success = success;
+        this.errMessage = errMessage;
+        this.data = data;
     }
 
     public ResponseWrapper(String errMessage) {
         this.success = false;
         this.errMessage = errMessage;
+        this.data = new HashMap<>();
     }
 
     public <T> ResponseWrapper addObject(T value, String key) {
