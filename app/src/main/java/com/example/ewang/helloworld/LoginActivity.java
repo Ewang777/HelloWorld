@@ -10,12 +10,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.example.ewang.helloworld.helper.DialogHelper;
 import com.example.ewang.helloworld.helper.MyApplication;
 import com.example.ewang.helloworld.helper.ResponseWrapper;
 import com.example.ewang.helloworld.model.User;
 import com.example.ewang.helloworld.helper.JsonHelper;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.Map;
 
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
@@ -47,10 +50,10 @@ public class LoginActivity extends AppCompatActivity {
         int requestType = intent.getIntExtra("request", 0);
         if (requestType == MainActivity.request_login) {
             btnSure.setText("登录");
-            requestUri = "/login";
+            requestUri = "/user/login";
         } else if (requestType == MainActivity.request_reg) {
             btnSure.setText("注册");
-            requestUri = "/reg";
+            requestUri = "/user/reg";
 
         }
 
@@ -67,7 +70,7 @@ public class LoginActivity extends AppCompatActivity {
                 judgeParameters(account, password);
 
 
-                new Thread(new Runnable() {
+                Thread loginThread = new Thread(new Runnable() {
                     @Override
                     public void run() {
                         try {
@@ -85,7 +88,13 @@ public class LoginActivity extends AppCompatActivity {
                             ResponseWrapper responseWrapper = JsonHelper.decode(data, ResponseWrapper.class);
 
                             if (responseWrapper.isSuccess()) {
-                                User currentUser = (User) responseWrapper.getReturnVal();
+                                Map<String, Object> userMap = (Map<String, Object>) responseWrapper.getData().get("user");
+
+                                User currentUser = new User((Long.parseLong(userMap.get("id") + "")),
+                                        (String) userMap.get("account"),
+                                        (String) userMap.get("password"),
+                                        (String) userMap.get("username"),
+                                        new Date((long) userMap.get("createTime")));
                                 SharedPreferences.Editor editor = getSharedPreferences("user", MODE_PRIVATE).edit();
                                 editor.putString("account", currentUser.getAccount());
                                 editor.putString("password", currentUser.getPassword());
@@ -98,17 +107,25 @@ public class LoginActivity extends AppCompatActivity {
                                     public void run() {
                                         Intent intent = new Intent(LoginActivity.this, ShowFriendsActivity.class);
                                         startActivity(intent);
+                                        finish();
                                     }
                                 });
                             } else {
-                                //TODO 弹出警告
+                                DialogHelper.showAlertDialog(LoginActivity.this, "Warning", responseWrapper.getErrMessage(), null, null);
                             }
 
                         } catch (IOException e) {
                             e.printStackTrace();
+                            DialogHelper.showAlertDialog(LoginActivity.this, "Warning", "登录异常", null, null);
                         }
                     }
                 });
+
+                loginThread.start();
+
+                DialogHelper.showProgressDialog(LoginActivity.this, "请稍后", "loading", (dialogInterface -> {
+                    loginThread.stop();
+                }));
 
 
             }
@@ -116,18 +133,12 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     void judgeParameters(String account, String pwd) {
-        AlertDialog.Builder warnDialog = new AlertDialog.Builder(LoginActivity.this);
-        warnDialog.setTitle("Warning");
-        warnDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
+        if (account.isEmpty() || null == account || pwd.isEmpty() || null == pwd) {
+            DialogHelper.showAlertDialog(LoginActivity.this, "Warning", "用户名或密码不得为空", (dialogInterface, i) -> {
                 editAccount.setText("");
                 editPwd.setText("");
-            }
-        });
-        if (account.isEmpty() || null == account || pwd.isEmpty() || null == pwd) {
-            warnDialog.setMessage("用户名或密码不得为空");
-            warnDialog.show();
+            }, null);
+
         }
     }
 }

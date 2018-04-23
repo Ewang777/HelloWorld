@@ -28,7 +28,7 @@
             android:layout_margin="5dp"
             android:gravity="center"
             android:text="18-01-01"
-            android:textSize="16dp" />
+            android:textSize="18dp" />
 
     </RelativeLayout>
 
@@ -43,7 +43,7 @@
             android:layout_centerVertical="true"
             android:layout_margin="5dp"
             android:text="The latest message u 2 speak"
-            android:textSize="16dp" />
+            android:textSize="18dp" />
 
     </RelativeLayout>
 

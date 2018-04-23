@@ -55,21 +55,32 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         User user = userList.get(position);
-        Message message = latestMessageMap.get(user.getId());
         holder.textUsername.setText(user.getUsername());
-        holder.textLatestMsg.setText(message.getContent());
-        Date latestMessageTime = message.getCreateTime();
-        long today = new Date().getTime();
 
-        String datePattern = "HH:mm";
-        //当天的时间显示 HH:mm
-        if (Math.abs(latestMessageTime.getTime() - today) <= 24 * 60 * 60 * 1000) {
-            datePattern = "HH:mm";
+        Message message = latestMessageMap.get(user.getId());
+        if (message != null) {
+            String content = message.getContent();
+            if (content.length() > 40) {
+                content = content.substring(0, 40) + "...";
+            }
+            holder.textLatestMsg.setText(content);
+
+            Date latestMessageTime = message.getCreateTime();
+            long today = new Date().getTime();
+
+            String datePattern = "HH:mm";
+            //当天的时间显示 HH:mm
+            if (Math.abs(latestMessageTime.getTime() - today) <= 24 * 60 * 60 * 1000) {
+                datePattern = "HH:mm";
+            } else {
+                datePattern = "yyyy-MM-dd";
+            }
+            SimpleDateFormat sdf = new SimpleDateFormat(datePattern);
+            holder.textLatestTime.setText(sdf.format(latestMessageTime));
         } else {
-            datePattern = "yyyy-MM-dd";
+            holder.textLatestMsg.setText("还没聊过天");
+            holder.textLatestTime.setText("没有聊天时间");
         }
-        SimpleDateFormat sdf = new SimpleDateFormat(datePattern);
-        holder.textLatestTime.setText(sdf.format(latestMessageTime));
 
 
     }
