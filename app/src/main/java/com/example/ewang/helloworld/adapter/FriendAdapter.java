@@ -10,7 +10,6 @@ import android.widget.TextView;
 import com.example.ewang.helloworld.R;
 import com.example.ewang.helloworld.SessionActivity;
 import com.example.ewang.helloworld.model.Message;
-import com.example.ewang.helloworld.model.Msg;
 import com.example.ewang.helloworld.model.User;
 
 import java.text.SimpleDateFormat;

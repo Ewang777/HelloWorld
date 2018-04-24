@@ -1,9 +1,13 @@
 package com.example.ewang.helloworld;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.ewang.helloworld.adapter.FriendAdapter;
@@ -16,9 +20,6 @@ import com.example.ewang.helloworld.model.User;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,10 +35,26 @@ public class ShowFriendsActivity extends AppCompatActivity {
 
     private RecyclerView friendRecyclerView;
 
+    private Button btnOff;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_friends);
+
+        btnOff = findViewById(R.id.btn_off);
+        btnOff.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ShowFriendsActivity.this, LoginActivity.class);
+                MyApplication.setCurrentUser(null);
+                SharedPreferences.Editor editor = getSharedPreferences("user", MODE_PRIVATE).edit();
+                editor.remove("account");
+                editor.remove("password");
+                editor.apply();
+                startActivity(intent);
+            }
+        });
 
         final User user = MyApplication.getCurrentUser();
         friendRecyclerView = findViewById(R.id.friend_recycler_view);
