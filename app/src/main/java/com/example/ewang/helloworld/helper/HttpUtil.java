@@ -1,5 +1,7 @@
 package com.example.ewang.helloworld.helper;
 
+import android.app.Activity;
+
 import java.io.IOException;
 
 import okhttp3.OkHttpClient;
@@ -13,14 +15,27 @@ import okhttp3.Response;
 
 public class HttpUtil {
 
-    public static String sendRequest(String url, RequestBody requestBody) throws IOException {
-        OkHttpClient okHttpClient = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url(url)
-                .post(requestBody)
-                .build();
-        Response response = okHttpClient.newCall(request).execute();
-        return response.body().string();
+    public static ResponseWrapper sendRequest(String url, RequestBody requestBody, Activity activity) {
+        String data = "{}";
+        try {
+            OkHttpClient okHttpClient = new OkHttpClient();
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(requestBody)
+                    .build();
+            Response response = okHttpClient.newCall(request).execute();
+            data = response.body().string();
+        } catch (IOException e) {
+            e.printStackTrace();
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    DialogHelper.showAlertDialog(activity, "Warning", "连接服务器异常", null, null);
+                }
+            });
+        }
+
+        return JsonHelper.decode(data, ResponseWrapper.class);
     }
 
 }

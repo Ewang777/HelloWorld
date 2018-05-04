@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.example.ewang.helloworld.adapter.FriendAdapter;
 import com.example.ewang.helloworld.helper.DialogHelper;
+import com.example.ewang.helloworld.helper.HttpUtil;
 import com.example.ewang.helloworld.helper.JsonHelper;
 import com.example.ewang.helloworld.helper.MyApplication;
 import com.example.ewang.helloworld.helper.ResponseWrapper;
@@ -19,15 +20,11 @@ import com.example.ewang.helloworld.model.Message;
 import com.example.ewang.helloworld.model.User;
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import okhttp3.FormBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.Response;
 
 public class ShowFriendsActivity extends AppCompatActivity {
 
@@ -46,12 +43,13 @@ public class ShowFriendsActivity extends AppCompatActivity {
         btnOff.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(ShowFriendsActivity.this, LoginActivity.class);
+                Intent intent = new Intent(ShowFriendsActivity.this, MainActivity.class);
                 MyApplication.setCurrentUser(null);
                 SharedPreferences.Editor editor = getSharedPreferences("user", MODE_PRIVATE).edit();
                 editor.remove("account");
                 editor.remove("password");
                 editor.apply();
+                finish();
                 startActivity(intent);
             }
         });
@@ -68,42 +66,38 @@ public class ShowFriendsActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                OkHttpClient client = new OkHttpClient();
                 RequestBody requestBody = new FormBody.Builder()
                         .add("userId", String.valueOf(user.getId()))
                         .build();
-                Request request = new Request.Builder()
-                        .url(MainActivity.basicUrl + "/user/find")
-                        .post(requestBody)
-                        .build();
-                try {
-                    Response response = client.newCall(request).execute();
-                    String data = response.body().string();
-                    ResponseWrapper responseWrapper = JsonHelper.decode(data, ResponseWrapper.class);
-                    if (responseWrapper.isSuccess()) {
-                        Map<String, Object> dataMap = responseWrapper.getData();
-                        List<User> userList = JsonHelper.decode(
-                                JsonHelper.encode(dataMap.get("userList")), new TypeReference<List<User>>() {
-                                });
-                        Map<Long, Message> messageMap = JsonHelper.decode(
-                                JsonHelper.encode(dataMap.get("messageMap")), new TypeReference<Map<Long, Message>>() {
-                                });
+                String url = MainActivity.basicUrl + "/user/find";
+                ResponseWrapper responseWrapper = HttpUtil.sendRequest(url, requestBody, ShowFriendsActivity.this);
 
-                        adapter = new FriendAdapter(userList, messageMap);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                friendRecyclerView.setAdapter(adapter);
-                            }
-                        });
-                    } else {
-                        DialogHelper.showAlertDialog(ShowFriendsActivity.this, "Warning", responseWrapper.getErrMessage(), null, null);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    DialogHelper.showAlertDialog(ShowFriendsActivity.this, "Warning", "连接服务器异常", null, null);
+                if (responseWrapper.isSuccess()) {
+                    Map<String, Object> dataMap = responseWrapper.getData();
+                    List<User> userList = JsonHelper.decode(
+                            JsonHelper.encode(dataMap.get("userList")), new TypeReference<List<User>>() {
+                            });
+                    Map<Long, Message> messageMap = JsonHelper.decode(
+                            JsonHelper.encode(dataMap.get("messageMap")), new TypeReference<Map<Long, Message>>() {
+                            });
+
+                    adapter = new FriendAdapter(userList, messageMap);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            friendRecyclerView.setAdapter(adapter);
+                        }
+                    });
+                } else {
+                    DialogHelper.showAlertDialog(ShowFriendsActivity.this, "Warning", responseWrapper.getErrMessage(), null, null);
                 }
+
             }
         }).start();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 }
