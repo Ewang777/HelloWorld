@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.ewang.helloworld.adapter.FriendAdapter;
+import com.example.ewang.helloworld.client.Constants;
 import com.example.ewang.helloworld.helper.DialogHelper;
 import com.example.ewang.helloworld.helper.HttpUtil;
 import com.example.ewang.helloworld.helper.JsonHelper;
@@ -80,7 +81,7 @@ public class ShowFriendsActivity extends AppCompatActivity {
                 RequestBody requestBody = new FormBody.Builder()
                         .add("userId", String.valueOf(user.getId()))
                         .build();
-                String url = MainActivity.basicUrl + "/user/find";
+                String url = Constants.DefaultBasicUrl.getValue() + "/user/find";
                 ResponseWrapper responseWrapper = HttpUtil.sendRequest(url, requestBody, ShowFriendsActivity.this);
 
                 if (responseWrapper.isSuccess()) {

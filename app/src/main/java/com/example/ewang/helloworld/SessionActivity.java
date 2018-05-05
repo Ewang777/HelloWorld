@@ -1,5 +1,6 @@
 package com.example.ewang.helloworld;
 
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,6 +10,8 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.example.ewang.helloworld.adapter.MsgAdapter;
+import com.example.ewang.helloworld.client.ClientThread;
+import com.example.ewang.helloworld.client.Constants;
 import com.example.ewang.helloworld.helper.HttpUtil;
 import com.example.ewang.helloworld.helper.JsonHelper;
 import com.example.ewang.helloworld.helper.MyApplication;
@@ -37,6 +40,16 @@ public class SessionActivity extends AppCompatActivity {
 
     private MsgAdapter adapter;
 
+    private Handler readHandler = new Handler() {
+        @Override
+        public void handleMessage(android.os.Message msg) {
+            msgList.add(new Msg((String) msg.obj, Msg.TYPE_RECEIVED));
+            adapter.notifyItemInserted(msgList.size() - 1);
+            msgRecyclerView.scrollToPosition(msgList.size() - 1);
+            super.handleMessage(msg);
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +57,11 @@ public class SessionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_session);
         long toUserId = getIntent().getLongExtra("toUserId", 0);
 
-        final User user = MyApplication.getCurrentUser();
+        User user = MyApplication.getCurrentUser();
+
+        ClientThread clientThread = new ClientThread(user.getId(), readHandler);
+        clientThread.start();
+
 
         editText = findViewById(R.id.input_text);
         sendBtn = findViewById(R.id.btn_send);
@@ -57,7 +74,7 @@ public class SessionActivity extends AppCompatActivity {
                         .add("userId", String.valueOf(user.getId()))
                         .add("toUserId", String.valueOf(toUserId))
                         .build();
-                String url = MainActivity.basicUrl + "/session/message/get";
+                String url = Constants.DefaultBasicUrl.getValue() + "/session/message/get";
                 ResponseWrapper responseWrapper = HttpUtil.sendRequest(url, requestBody, SessionActivity.this);
 
                 Map<String, Object> dataMap = responseWrapper.getData();
@@ -89,6 +106,13 @@ public class SessionActivity extends AppCompatActivity {
                 if (content.isEmpty()) {
                     return;
                 }
+
+                String data = JsonHelper.encode(new Message(0, user.getId(), toUserId, content, 0, 0));
+                android.os.Message message = android.os.Message.obtain();
+                message.what = 0;
+                message.obj = data;
+                clientThread.writeHandler.sendMessage(message);
+
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -97,7 +121,7 @@ public class SessionActivity extends AppCompatActivity {
                                 .add("userId", String.valueOf(user.getId()))
                                 .add("toUserId", String.valueOf(toUserId))
                                 .build();
-                        String url = MainActivity.basicUrl + "/session/message/send";
+                        String url = Constants.DefaultBasicUrl.getValue() + "/session/message/send";
 
                         ResponseWrapper responseWrapper = null;
                         do {

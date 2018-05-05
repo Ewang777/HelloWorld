@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.example.ewang.helloworld.client.Constants;
 import com.example.ewang.helloworld.helper.DialogHelper;
 import com.example.ewang.helloworld.helper.HttpUtil;
 import com.example.ewang.helloworld.helper.MyApplication;
@@ -55,7 +56,7 @@ public class LoginActivity extends AppCompatActivity {
         editAccount = findViewById(R.id.edit_account);
         editPwd = findViewById(R.id.edit_pwd);
 
-        final String requestUrl = MainActivity.basicUrl + requestUri;
+        String requestUrl = Constants.DefaultBasicUrl.getValue() + requestUri;
         btnSure.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -93,6 +94,7 @@ public class LoginActivity extends AppCompatActivity {
                                 @Override
                                 public void run() {
                                     Intent intent = new Intent(LoginActivity.this, ShowFriendsActivity.class);
+                                    progressDialog.dismiss();
                                     startActivity(intent);
                                     finish();
                                 }
@@ -101,11 +103,11 @@ public class LoginActivity extends AppCompatActivity {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
+                                    progressDialog.dismiss();
                                     DialogHelper.showAlertDialog(LoginActivity.this, "Warning", responseWrapper.getErrMessage(), null, null);
                                 }
                             });
                         }
-                        progressDialog.dismiss();
                     }
                 });
 
