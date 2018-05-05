@@ -34,6 +34,8 @@ public class ShowFriendsActivity extends AppCompatActivity {
 
     private Button btnOff;
 
+    private User user = MyApplication.getCurrentUser();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,7 +56,6 @@ public class ShowFriendsActivity extends AppCompatActivity {
             }
         });
 
-        final User user = MyApplication.getCurrentUser();
         friendRecyclerView = findViewById(R.id.friend_recycler_view);
 
         TextView usernameTextView = findViewById(R.id.text_current_username);
@@ -63,6 +64,16 @@ public class ShowFriendsActivity extends AppCompatActivity {
         LinearLayoutManager layoutManager = new LinearLayoutManager(ShowFriendsActivity.this);
         friendRecyclerView.setLayoutManager(layoutManager);
 
+        setMessageAdapter(user);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setMessageAdapter(user);
+    }
+
+    void setMessageAdapter(User user) {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -82,6 +93,7 @@ public class ShowFriendsActivity extends AppCompatActivity {
                             });
 
                     adapter = new FriendAdapter(userList, messageMap);
+
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -89,15 +101,15 @@ public class ShowFriendsActivity extends AppCompatActivity {
                         }
                     });
                 } else {
-                    DialogHelper.showAlertDialog(ShowFriendsActivity.this, "Warning", responseWrapper.getErrMessage(), null, null);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            DialogHelper.showAlertDialog(ShowFriendsActivity.this, "Warning", responseWrapper.getErrMessage(), null, null);
+                        }
+                    });
                 }
-
             }
         }).start();
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
     }
 }
