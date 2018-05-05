@@ -98,10 +98,11 @@ public class SessionActivity extends AppCompatActivity {
                                 .add("toUserId", String.valueOf(toUserId))
                                 .build();
                         String url = MainActivity.basicUrl + "/session/message/send";
+
                         ResponseWrapper responseWrapper = null;
-                        while (!responseWrapper.isSuccess()) {
+                        do {
                             responseWrapper = HttpUtil.sendRequest(url, requestBody, SessionActivity.this);
-                        }
+                        } while (!responseWrapper.isSuccess());
                     }
                 }).start();
                 Msg msg = new Msg(content, Msg.TYPE_SENT);
@@ -114,9 +115,4 @@ public class SessionActivity extends AppCompatActivity {
         });
     }
 
-    //TODO
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
 }
