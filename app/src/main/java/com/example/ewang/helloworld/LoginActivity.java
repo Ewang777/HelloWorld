@@ -78,11 +78,10 @@ public class LoginActivity extends AppCompatActivity {
                                 .build();
                         ResponseWrapper responseWrapper = HttpUtil.sendRequest(requestUrl, requestBody, LoginActivity.this);
 
-
                         if (responseWrapper.isSuccess()) {
-                            Map<String, Object> userMap = (Map<String, Object>) responseWrapper.getData().get("user");
+                            Object userObject = responseWrapper.getData().get("user");
 
-                            User currentUser = JsonHelper.decode(JsonHelper.encode(userMap), User.class);
+                            User currentUser = JsonHelper.decode(JsonHelper.encode(userObject), User.class);
                             SharedPreferences.Editor editor = getSharedPreferences("user", MODE_PRIVATE).edit();
                             editor.putString("account", currentUser.getAccount());
                             editor.putString("password", currentUser.getPassword());
