@@ -60,6 +60,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                 int position = viewHolder.getAdapterPosition();
                 User user = userList.get(position);
                 intent.putExtra("toUserId", user.getId());
+                intent.putExtra("toUsername", user.getUsername());
                 v.getContext().startActivity(intent);
             }
         });

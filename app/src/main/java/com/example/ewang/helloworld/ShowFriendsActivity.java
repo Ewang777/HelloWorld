@@ -8,7 +8,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 import com.example.ewang.helloworld.adapter.FriendAdapter;
 import com.example.ewang.helloworld.client.Constants;
@@ -43,6 +42,7 @@ public class ShowFriendsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_show_friends);
 
         btnOff = findViewById(R.id.btn_off);
+        btnOff.setVisibility(View.VISIBLE);
         btnOff.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -58,9 +58,6 @@ public class ShowFriendsActivity extends AppCompatActivity {
         });
 
         friendRecyclerView = findViewById(R.id.friend_recycler_view);
-
-        TextView usernameTextView = findViewById(R.id.text_current_username);
-        usernameTextView.setText(usernameTextView.getText() + user.getUsername());
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(ShowFriendsActivity.this);
         friendRecyclerView.setLayoutManager(layoutManager);
@@ -82,7 +79,7 @@ public class ShowFriendsActivity extends AppCompatActivity {
                         .add("userId", String.valueOf(user.getId()))
                         .build();
                 String url = Constants.DefaultBasicUrl.getValue() + "/user/find";
-                ResponseWrapper responseWrapper = HttpUtil.sendRequest(url, requestBody, ShowFriendsActivity.this);
+                ResponseWrapper responseWrapper = HttpUtil.sendRequest(url, requestBody, ShowFriendsActivity.this, null);
 
                 if (responseWrapper.isSuccess()) {
                     Map<String, Object> dataMap = responseWrapper.getData();

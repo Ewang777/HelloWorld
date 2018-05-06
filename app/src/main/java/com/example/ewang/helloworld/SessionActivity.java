@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.example.ewang.helloworld.adapter.MsgAdapter;
 import com.example.ewang.helloworld.client.ClientThread;
@@ -56,6 +57,7 @@ public class SessionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session);
         long toUserId = getIntent().getLongExtra("toUserId", 0);
+        String toUsername = getIntent().getStringExtra("toUsername");
 
         User user = MyApplication.getCurrentUser();
 
@@ -67,6 +69,9 @@ public class SessionActivity extends AppCompatActivity {
         sendBtn = findViewById(R.id.btn_send);
         msgRecyclerView = findViewById(R.id.msg_recycler_view);
 
+        TextView textView = findViewById(R.id.username_text);
+        textView.setText(toUsername);
+
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -75,7 +80,7 @@ public class SessionActivity extends AppCompatActivity {
                         .add("toUserId", String.valueOf(toUserId))
                         .build();
                 String url = Constants.DefaultBasicUrl.getValue() + "/session/message/get";
-                ResponseWrapper responseWrapper = HttpUtil.sendRequest(url, requestBody, SessionActivity.this);
+                ResponseWrapper responseWrapper = HttpUtil.sendRequest(url, requestBody, SessionActivity.this, null);
 
                 Map<String, Object> dataMap = responseWrapper.getData();
                 List<Message> messageList = JsonHelper.decode(JsonHelper.encode(dataMap.get("messageList")), new TypeReference<List<Message>>() {
@@ -125,7 +130,7 @@ public class SessionActivity extends AppCompatActivity {
 
                         ResponseWrapper responseWrapper = null;
                         do {
-                            responseWrapper = HttpUtil.sendRequest(url, requestBody, SessionActivity.this);
+                            responseWrapper = HttpUtil.sendRequest(url, requestBody, SessionActivity.this, null);
                         } while (!responseWrapper.isSuccess());
                     }
                 }).start();

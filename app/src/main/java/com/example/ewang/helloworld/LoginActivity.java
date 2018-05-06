@@ -17,8 +17,6 @@ import com.example.ewang.helloworld.helper.ResponseWrapper;
 import com.example.ewang.helloworld.model.User;
 import com.example.ewang.helloworld.helper.JsonHelper;
 
-import java.util.Map;
-
 import okhttp3.FormBody;
 import okhttp3.RequestBody;
 
@@ -76,8 +74,11 @@ public class LoginActivity extends AppCompatActivity {
                                 .add("account", account)
                                 .add("password", password)
                                 .build();
-                        ResponseWrapper responseWrapper = HttpUtil.sendRequest(requestUrl, requestBody, LoginActivity.this);
+                        ResponseWrapper responseWrapper = HttpUtil.sendRequest(requestUrl, requestBody, LoginActivity.this, progressDialog);
 
+                        if (responseWrapper == null) {
+                            return;
+                        }
                         if (responseWrapper.isSuccess()) {
                             Object userObject = responseWrapper.getData().get("user");
 
