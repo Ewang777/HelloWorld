@@ -2,6 +2,7 @@ package com.example.ewang.helloworld.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.IBinder;
 
 import com.example.ewang.helloworld.SessionActivity;
@@ -50,7 +51,7 @@ public class ShowMessagesService extends Service {
                 .add("userId", String.valueOf(intent.getLongExtra("userId", 0)))
                 .add("toUserId", String.valueOf(intent.getLongExtra("toUserId", 0)))
                 .build();
-        new RequestTask(responseListener).execute(url, requestBody);
+        new RequestTask(responseListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url, requestBody);
         return super.onStartCommand(intent, flags, startId);
     }
 

@@ -47,14 +47,12 @@ public class RequestTask extends AsyncTask<Object, Void, ResponseWrapper> {
     @Override
     protected void onPostExecute(ResponseWrapper responseWrapper) {
         super.onPostExecute(responseWrapper);
-        if (responseWrapper == null) {
-            DialogHelper.showAlertDialog(MyApplication.getCurrentActivity(), "Warning", "连接服务器异常", null, null);
-            return;
-        }
-        if (responseWrapper.isSuccess()) {
-            responseListener.onSuccess(responseWrapper);
-        } else {
+        if (responseWrapper == null ){
+            responseListener.onFail(null);
+        }else if( !responseWrapper.isSuccess()) {
             responseListener.onFail(responseWrapper.getErrMessage());
+        } else if (responseWrapper.isSuccess()) {
+            responseListener.onSuccess(responseWrapper);
         }
     }
 }

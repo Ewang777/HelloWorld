@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.IBinder;
 
 import com.example.ewang.helloworld.ShowFriendsActivity;
@@ -41,6 +42,7 @@ public class LoginService extends Service {
         @Override
         public void onFail(String errMessage) {
             progressDialog.dismiss();
+            errMessage = errMessage == null ? "连接服务器异常" : errMessage;
             DialogHelper.showAlertDialog(MyApplication.getCurrentActivity(), "Warning", errMessage, null, null);
         }
     };
@@ -53,7 +55,7 @@ public class LoginService extends Service {
                 .add("account", intent.getStringExtra("account"))
                 .add("password", intent.getStringExtra("password"))
                 .build();
-        new RequestTask(responseListener).execute(url, requestBody);
+        new RequestTask(responseListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url, requestBody);
         return super.onStartCommand(intent, flags, startId);
     }
 

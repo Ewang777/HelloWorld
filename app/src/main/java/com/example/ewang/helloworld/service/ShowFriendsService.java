@@ -2,7 +2,9 @@ package com.example.ewang.helloworld.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.IBinder;
+
 import com.example.ewang.helloworld.ShowFriendsActivity;
 import com.example.ewang.helloworld.helper.JsonHelper;
 import com.example.ewang.helloworld.helper.ResponseWrapper;
@@ -44,7 +46,7 @@ public class ShowFriendsService extends Service {
         RequestBody requestBody = new FormBody.Builder()
                 .add("userId", String.valueOf(intent.getLongExtra("userId", 0)))
                 .build();
-        new RequestTask(responseListener).execute(url, requestBody);
+        new RequestTask(responseListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url, requestBody);
         return super.onStartCommand(intent, flags, startId);
     }
 

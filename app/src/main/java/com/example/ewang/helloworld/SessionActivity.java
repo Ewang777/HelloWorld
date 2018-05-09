@@ -1,7 +1,7 @@
 package com.example.ewang.helloworld;
 
 import android.content.Intent;
-import android.os.Handler;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,16 +12,16 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.ewang.helloworld.adapter.MsgAdapter;
-import com.example.ewang.helloworld.client.ClientThread;
 import com.example.ewang.helloworld.client.Constants;
-import com.example.ewang.helloworld.helper.JsonHelper;
 import com.example.ewang.helloworld.helper.MyApplication;
 import com.example.ewang.helloworld.model.Message;
 import com.example.ewang.helloworld.model.Msg;
 import com.example.ewang.helloworld.model.User;
 import com.example.ewang.helloworld.service.SendMessageService;
-import com.example.ewang.helloworld.service.SessionService;
 import com.example.ewang.helloworld.service.ShowMessagesService;
+import com.example.ewang.helloworld.service.task.SocketTask;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,19 +39,6 @@ public class SessionActivity extends AppCompatActivity {
     public static RecyclerView msgRecyclerView;
 
     public static MsgAdapter adapter;
-
-    private SessionService.SessionBinder sessionBinder;
-
-    private Handler readHandler = new Handler() {
-        @Override
-        public void handleMessage(android.os.Message msg) {
-            msgList.add(new Msg((String) msg.obj, Msg.TYPE_RECEIVED));
-            adapter.notifyItemInserted(msgList.size() - 1);
-            msgRecyclerView.scrollToPosition(msgList.size() - 1);
-            super.handleMessage(msg);
-        }
-    };
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,9 +67,7 @@ public class SessionActivity extends AppCompatActivity {
                 .putExtra("toUserId", toUserId);
         startService(showMessagesIntent);
 
-        //TODO socket发消息不使用AsyncTask机制 AsyncTask机制的后台线程只能运行一次
-        ClientThread clientThread = new ClientThread(user.getId(), readHandler);
-        clientThread.start();
+        new SocketTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, user.getId());
 
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,17 +79,14 @@ public class SessionActivity extends AppCompatActivity {
 
                 Message m = new Message(0, user.getId(), toUserId, content, 0, 0);
 
-                android.os.Message androidMessage = android.os.Message.obtain();
-                androidMessage.what = 0;
-                androidMessage.obj = JsonHelper.encode(m);
-                clientThread.writeHandler.sendMessage(androidMessage);
-
                 Intent sendMessageIntent = new Intent(SessionActivity.this, SendMessageService.class)
                         .putExtra("url", Constants.DefaultBasicUrl.getValue() + "/session/message/send")
                         .putExtra("content", content)
                         .putExtra("userId", user.getId())
                         .putExtra("toUserId", toUserId);
                 startService(sendMessageIntent);
+
+                EventBus.getDefault().post(m);
 
                 Msg msg = new Msg(content, Msg.TYPE_SENT);
                 notifyNewMsg(msg);

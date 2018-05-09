@@ -2,6 +2,7 @@ package com.example.ewang.helloworld.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.IBinder;
 
 import com.example.ewang.helloworld.helper.DialogHelper;
@@ -62,6 +63,6 @@ public class SendMessageService extends Service {
                 .add("userId", String.valueOf(userId))
                 .add("toUserId", String.valueOf(toUserId))
                 .build();
-        new RequestTask(responseListener).execute(url, requestBody);
+        new RequestTask(responseListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url, requestBody);
     }
 }
