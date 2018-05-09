@@ -1,5 +1,6 @@
 package com.example.ewang.helloworld.helper;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 
@@ -13,6 +14,8 @@ public class MyApplication extends Application {
 
     private static Context context;
 
+    private static Activity currentActivity;
+
     private static User currentUser;
 
     @Override
@@ -20,6 +23,7 @@ public class MyApplication extends Application {
         super.onCreate();
         context = getApplicationContext();
         currentUser = null;
+        currentActivity = null;
     }
 
     public static void setCurrentUser(User currentUser) {
@@ -32,5 +36,13 @@ public class MyApplication extends Application {
 
     public static Context getContext() {
         return context;
+    }
+
+    public static Activity getCurrentActivity() {
+        return currentActivity;
+    }
+
+    public static void setCurrentActivity(Activity currentActivity) {
+        MyApplication.currentActivity = currentActivity;
     }
 }

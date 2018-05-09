@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.example.ewang.helloworld.helper.MyApplication;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     static final int request_login = 0;
@@ -15,6 +17,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        MyApplication.setCurrentActivity(this);
 
         Button btnLogin = findViewById(R.id.btn_login);
         Button btnReg = findViewById(R.id.btn_reg);

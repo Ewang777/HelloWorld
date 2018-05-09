@@ -11,28 +11,25 @@ import android.widget.Button;
 
 import com.example.ewang.helloworld.adapter.FriendAdapter;
 import com.example.ewang.helloworld.client.Constants;
-import com.example.ewang.helloworld.helper.DialogHelper;
-import com.example.ewang.helloworld.helper.HttpUtil;
-import com.example.ewang.helloworld.helper.JsonHelper;
 import com.example.ewang.helloworld.helper.MyApplication;
-import com.example.ewang.helloworld.helper.ResponseWrapper;
 import com.example.ewang.helloworld.model.Message;
 import com.example.ewang.helloworld.model.User;
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.example.ewang.helloworld.service.ShowFriendsService;
 
 import java.util.List;
 import java.util.Map;
 
-import okhttp3.FormBody;
-import okhttp3.RequestBody;
-
 public class ShowFriendsActivity extends AppCompatActivity {
 
-    private FriendAdapter adapter;
-
-    private RecyclerView friendRecyclerView;
-
     private Button btnOff;
+
+    public static RecyclerView friendRecyclerView;
+
+    private static FriendAdapter adapter;
+
+    private static List<User> userList;
+
+    private static Map<Long, Message> messageMap;
 
     private User user = MyApplication.getCurrentUser();
 
@@ -40,8 +37,14 @@ public class ShowFriendsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_friends);
+        MyApplication.setCurrentActivity(this);
 
         btnOff = findViewById(R.id.btn_off);
+        friendRecyclerView = findViewById(R.id.friend_recycler_view);
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(ShowFriendsActivity.this);
+        friendRecyclerView.setLayoutManager(layoutManager);
+
         btnOff.setVisibility(View.VISIBLE);
         btnOff.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -57,11 +60,6 @@ public class ShowFriendsActivity extends AppCompatActivity {
             }
         });
 
-        friendRecyclerView = findViewById(R.id.friend_recycler_view);
-
-        LinearLayoutManager layoutManager = new LinearLayoutManager(ShowFriendsActivity.this);
-        friendRecyclerView.setLayoutManager(layoutManager);
-
         setMessageAdapter(user);
     }
 
@@ -72,42 +70,17 @@ public class ShowFriendsActivity extends AppCompatActivity {
     }
 
     void setMessageAdapter(User user) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                RequestBody requestBody = new FormBody.Builder()
-                        .add("userId", String.valueOf(user.getId()))
-                        .build();
-                String url = Constants.DefaultBasicUrl.getValue() + "/user/find";
-                ResponseWrapper responseWrapper = HttpUtil.sendRequest(url, requestBody, ShowFriendsActivity.this, null);
+        Intent showFriendsIntent = new Intent(ShowFriendsActivity.this, ShowFriendsService.class)
+                .putExtra("url", Constants.DefaultBasicUrl.getValue() + "/user/find")
+                .putExtra("userId", user.getId());
+        startService(showFriendsIntent);
 
-                if (responseWrapper.isSuccess()) {
-                    Map<String, Object> dataMap = responseWrapper.getData();
-                    List<User> userList = JsonHelper.decode(
-                            JsonHelper.encode(dataMap.get("userList")), new TypeReference<List<User>>() {
-                            });
-                    Map<Long, Message> messageMap = JsonHelper.decode(
-                            JsonHelper.encode(dataMap.get("messageMap")), new TypeReference<Map<Long, Message>>() {
-                            });
+    }
 
-                    adapter = new FriendAdapter(userList, messageMap);
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            friendRecyclerView.setAdapter(adapter);
-                        }
-                    });
-                } else {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            DialogHelper.showAlertDialog(ShowFriendsActivity.this, "Warning", responseWrapper.getErrMessage(), null, null);
-                        }
-                    });
-                }
-            }
-        }).start();
-
+    public static void setAdapter(List<User> users, Map<Long, Message> latestMessageMap) {
+        userList = users;
+        messageMap = latestMessageMap;
+        adapter = new FriendAdapter(userList, latestMessageMap);
+        friendRecyclerView.setAdapter(adapter);
     }
 }
