@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         intent.putExtra("request", data);
+        finish();
         startActivity(intent);
     }
 }

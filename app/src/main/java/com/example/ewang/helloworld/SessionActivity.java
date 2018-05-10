@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -77,26 +78,19 @@ public class SessionActivity extends AppCompatActivity {
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String content = editText.getText().toString();
-                if (content.isEmpty()) {
-                    return;
+                setSendListener(user.getId(), toUserId);
+
+            }
+        });
+
+        editText.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                    setSendListener(user.getId(), toUserId);
+                    return true;
                 }
-
-                Message m = new Message(0, user.getId(), toUserId, content, 0, 0);
-
-                Intent sendMessageIntent = new Intent(SessionActivity.this, SendMessageService.class)
-                        .putExtra("url", Constants.DefaultBasicUrl.getValue() + "/session/message/send")
-                        .putExtra("content", content)
-                        .putExtra("userId", user.getId())
-                        .putExtra("toUserId", toUserId);
-                startService(sendMessageIntent);
-
-                EventBus.getDefault().post(m);
-
-                Msg msg = new Msg(content, Msg.TYPE_SENT);
-                notifyNewMsg(msg);
-                editText.setText("");
-
+                return false;
             }
         });
     }
@@ -119,5 +113,28 @@ public class SessionActivity extends AppCompatActivity {
         msgRecyclerView.setAdapter(adapter);
         msgRecyclerView.scrollToPosition(msgList.size() - 1);
     }
+
+    void setSendListener(long userId, long toUserId) {
+        String content = editText.getText().toString();
+        if (content.isEmpty()) {
+            return;
+        }
+
+        Message m = new Message(0, userId, toUserId, content, 0, 0);
+
+        Intent sendMessageIntent = new Intent(SessionActivity.this, SendMessageService.class)
+                .putExtra("url", Constants.DefaultBasicUrl.getValue() + "/session/message/send")
+                .putExtra("content", content)
+                .putExtra("userId", userId)
+                .putExtra("toUserId", toUserId);
+        startService(sendMessageIntent);
+
+        EventBus.getDefault().post(m);
+
+        Msg msg = new Msg(content, Msg.TYPE_SENT);
+        notifyNewMsg(msg);
+        editText.setText("");
+    }
+
 
 }

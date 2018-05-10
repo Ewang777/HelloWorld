@@ -35,6 +35,7 @@ public class LoginService extends Service {
             MyApplication.setCurrentUser(currentUser);
 
             progressDialog.dismiss();
+            MyApplication.getCurrentActivity().finish();
             Intent intent = new Intent(MyApplication.getCurrentActivity(), ShowFriendsActivity.class);
             startActivity(intent);
         }

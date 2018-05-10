@@ -36,6 +36,9 @@ public class RequestTask extends AsyncTask<Object, Void, ResponseWrapper> {
                     .build();
             Response response = okHttpClient.newCall(request).execute();
             String data = response.body().string();
+            if (data.isEmpty()) {
+                return null;
+            }
             return JsonHelper.decode(data, ResponseWrapper.class);
         } catch (IOException e) {
             return null;
@@ -45,9 +48,9 @@ public class RequestTask extends AsyncTask<Object, Void, ResponseWrapper> {
     @Override
     protected void onPostExecute(ResponseWrapper responseWrapper) {
         super.onPostExecute(responseWrapper);
-        if (responseWrapper == null ){
+        if (responseWrapper == null) {
             responseListener.onFail(null);
-        }else if( !responseWrapper.isSuccess()) {
+        } else if (!responseWrapper.isSuccess()) {
             responseListener.onFail(responseWrapper.getErrMessage());
         } else if (responseWrapper.isSuccess()) {
             responseListener.onSuccess(responseWrapper);
