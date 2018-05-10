@@ -84,7 +84,11 @@ public class SessionAdapter extends RecyclerView.Adapter<SessionAdapter.ViewHold
                 messageContent = messageContent.substring(0, 20) + "...";
             }
             holder.textLatestMsg.setText(messageContent);
-            holder.textUnread.setText(session.getUnread());
+            int unreadCount = session.getUnread();
+            if (unreadCount > 0) {
+                holder.textUnread.setText(String.valueOf(unreadCount));
+                holder.textUnread.setVisibility(View.VISIBLE);
+            }
 
             Date latestMessageTime = session.getUpdateTime();
             long today = new Date().getTime();

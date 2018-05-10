@@ -33,6 +33,7 @@ public class SendMessageService extends Service {
 
         @Override
         public void onFail(String errMessage) {
+            //TODO 网路异常重发问题
             if (failTime > 10) {
                 DialogHelper.showAlertDialog(MyApplication.getCurrentActivity(), "Warnning", "网络异常，消息未发出", null, null);
             } else {
