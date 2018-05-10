@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -28,6 +29,8 @@ import java.util.List;
 
 public class SessionActivity extends AppCompatActivity {
 
+    private SocketTask socketTask;
+
     private static List<Msg> msgList = new ArrayList<>();
 
     private EditText editText;
@@ -42,6 +45,7 @@ public class SessionActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("Session", "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session);
         MyApplication.setCurrentActivity(this);
@@ -67,7 +71,8 @@ public class SessionActivity extends AppCompatActivity {
                 .putExtra("toUserId", toUserId);
         startService(showMessagesIntent);
 
-        new SocketTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, user.getId());
+        socketTask = new SocketTask();
+        socketTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, user.getId());
 
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,6 +99,12 @@ public class SessionActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        socketTask.closeSocket();
     }
 
     public static void notifyNewMsg(Msg msg) {

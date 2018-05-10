@@ -1,6 +1,7 @@
 package com.example.ewang.helloworld.service.task;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.example.ewang.helloworld.SessionActivity;
 import com.example.ewang.helloworld.client.Constants;
@@ -71,14 +72,24 @@ public class SocketTask extends AsyncTask<Object, Msg, Boolean> {
         try {
             return bufferedReader.readLine();
         } catch (IOException e) {
-            e.printStackTrace();
             return null;
         }
     }
 
+    public void closeSocket() {
+        try {
+            socket.close();
+            bufferedReader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.d("fail:", "in closing socket");
+        }
+
+    }
+
     @Subscribe(threadMode = ThreadMode.ASYNC)
-    public void onSendMsgEvent(Message m){
-        String msgJson= JsonHelper.encode(m);
+    public void onSendMsgEvent(Message m) {
+        String msgJson = JsonHelper.encode(m);
         try {
             outputStream.write((msgJson + "\n").getBytes(Constants.CharsetName.getValue()));
         } catch (IOException e) {

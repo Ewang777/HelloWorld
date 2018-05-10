@@ -2,9 +2,7 @@ package com.example.ewang.helloworld.service.task;
 
 import android.os.AsyncTask;
 
-import com.example.ewang.helloworld.helper.DialogHelper;
 import com.example.ewang.helloworld.helper.JsonHelper;
-import com.example.ewang.helloworld.helper.MyApplication;
 import com.example.ewang.helloworld.helper.ResponseWrapper;
 
 import java.io.IOException;
