@@ -6,6 +6,8 @@ import android.content.Context;
 
 import com.example.ewang.helloworld.model.User;
 
+import java.lang.ref.WeakReference;
+
 /**
  * Created by ewang on 2018/4/21.
  */
@@ -14,7 +16,7 @@ public class MyApplication extends Application {
 
     private static Context context;
 
-    private static Activity currentActivity;
+    private static WeakReference<Activity> currentActivity;
 
     private static User currentUser;
 
@@ -39,10 +41,10 @@ public class MyApplication extends Application {
     }
 
     public static Activity getCurrentActivity() {
-        return currentActivity;
+        return currentActivity.get();
     }
 
     public static void setCurrentActivity(Activity currentActivity) {
-        MyApplication.currentActivity = currentActivity;
+        MyApplication.currentActivity = new WeakReference(currentActivity);
     }
 }
