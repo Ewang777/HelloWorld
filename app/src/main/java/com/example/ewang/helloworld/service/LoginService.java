@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.IBinder;
 
-import com.example.ewang.helloworld.ShowFriendsActivity;
+import com.example.ewang.helloworld.ShowSessionListActivity;
 import com.example.ewang.helloworld.helper.DialogHelper;
 import com.example.ewang.helloworld.helper.JsonHelper;
 import com.example.ewang.helloworld.helper.MyApplication;
@@ -36,7 +36,7 @@ public class LoginService extends Service {
 
             progressDialog.dismiss();
             MyApplication.getCurrentActivity().finish();
-            Intent intent = new Intent(MyApplication.getCurrentActivity(), ShowFriendsActivity.class);
+            Intent intent = new Intent(MyApplication.getCurrentActivity(), ShowSessionListActivity.class);
             startActivity(intent);
         }
 

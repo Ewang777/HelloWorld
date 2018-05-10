@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import com.example.ewang.helloworld.R;
 import com.example.ewang.helloworld.SessionActivity;
-import com.example.ewang.helloworld.model.Message;
+import com.example.ewang.helloworld.model.Session;
 import com.example.ewang.helloworld.model.User;
 
 import java.text.SimpleDateFormat;
@@ -21,15 +21,18 @@ import java.util.Map;
  * Created by ewang on 2018/4/21.
  */
 
-public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder> {
+public class SessionAdapter extends RecyclerView.Adapter<SessionAdapter.ViewHolder> {
 
     private List<User> userList;
 
-    private Map<Long, Message> latestMessageMap;
+    private Map<Long, String> latestMessageMap;
 
-    public FriendAdapter(List<User> userList, Map<Long, Message> latestMessageMap) {
+    private Map<Long, Session> sessionMap;
+
+    public SessionAdapter(List<User> userList, Map<Long, String> latestMessageMap, Map<Long, Session> sessionMap) {
         this.userList = userList;
         this.latestMessageMap = latestMessageMap;
+        this.sessionMap = sessionMap;
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -38,6 +41,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         TextView textUsername;
         TextView textLatestTime;
         TextView textLatestMsg;
+        TextView textUnread;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -45,13 +49,14 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
             textUsername = itemView.findViewById(R.id.text_username);
             textLatestMsg = itemView.findViewById(R.id.text_latestMsg);
             textLatestTime = itemView.findViewById(R.id.text_latestTime);
+            textUnread = itemView.findViewById(R.id.text_unread);
         }
     }
 
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.friend_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.session_item, parent, false);
         ViewHolder viewHolder = new ViewHolder(view);
         viewHolder.friendView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,15 +77,16 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         User user = userList.get(position);
         holder.textUsername.setText(user.getUsername());
 
-        Message message = latestMessageMap.get(user.getId());
-        if (message != null) {
-            String content = message.getContent();
-            if (content.length() > 20) {
-                content = content.substring(0, 20) + "...";
+        String messageContent = latestMessageMap.get(user.getId());
+        Session session = sessionMap.get(user.getId());
+        if (messageContent != null && !messageContent.isEmpty()) {
+            if (messageContent.length() > 20) {
+                messageContent = messageContent.substring(0, 20) + "...";
             }
-            holder.textLatestMsg.setText(content);
+            holder.textLatestMsg.setText(messageContent);
+            holder.textUnread.setText(session.getUnread());
 
-            Date latestMessageTime = message.getCreateTime();
+            Date latestMessageTime = session.getUpdateTime();
             long today = new Date().getTime();
 
             String datePattern = "HH:mm";

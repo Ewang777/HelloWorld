@@ -5,10 +5,10 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.IBinder;
 
-import com.example.ewang.helloworld.ShowFriendsActivity;
+import com.example.ewang.helloworld.ShowSessionListActivity;
 import com.example.ewang.helloworld.helper.JsonHelper;
 import com.example.ewang.helloworld.helper.ResponseWrapper;
-import com.example.ewang.helloworld.model.Message;
+import com.example.ewang.helloworld.model.Session;
 import com.example.ewang.helloworld.model.User;
 import com.example.ewang.helloworld.service.task.RequestTask;
 import com.example.ewang.helloworld.service.task.ResponseListener;
@@ -33,10 +33,13 @@ public class ShowFriendsService extends Service {
             List<User> userList = JsonHelper.decode(
                     JsonHelper.encode(dataMap.get("userList")), new TypeReference<List<User>>() {
                     });
-            Map<Long, Message> messageMap = JsonHelper.decode(
-                    JsonHelper.encode(dataMap.get("messageMap")), new TypeReference<Map<Long, Message>>() {
+            Map<Long, String> messageMap = JsonHelper.decode(
+                    JsonHelper.encode(dataMap.get("messageMap")), new TypeReference<Map<Long, String>>() {
                     });
-            ShowFriendsActivity.setAdapter(userList, messageMap);
+            Map<Long, Session> sessionMap = JsonHelper.decode(
+                    JsonHelper.encode(dataMap.get("sessionMap")), new TypeReference<Map<Long, Session>>() {
+                    });
+            ShowSessionListActivity.setAdapter(userList, messageMap, sessionMap);
         }
     };
 

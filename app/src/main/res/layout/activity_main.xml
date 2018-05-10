@@ -12,7 +12,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="100dp"
         android:text="Welcome To Chat"
-        android:textSize="18dp"
+        android:textSize="18sp"
         android:textStyle="bold" />
 
     <RelativeLayout
