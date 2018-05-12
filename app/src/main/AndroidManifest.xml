@@ -41,6 +41,10 @@
             android:name=".service.SendMessageService"
             android:enabled="true"
             android:exported="true" />
+        <service
+            android:name=".service.ClearUnreadService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

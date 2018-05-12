@@ -18,15 +18,21 @@ import com.example.ewang.helloworld.client.Constants;
 import com.example.ewang.helloworld.helper.MyApplication;
 import com.example.ewang.helloworld.model.Message;
 import com.example.ewang.helloworld.model.Msg;
+import com.example.ewang.helloworld.model.Session;
 import com.example.ewang.helloworld.model.User;
+import com.example.ewang.helloworld.service.ClearUnreadService;
 import com.example.ewang.helloworld.service.SendMessageService;
 import com.example.ewang.helloworld.service.ShowMessagesService;
+import com.example.ewang.helloworld.service.task.RequestTask;
 import com.example.ewang.helloworld.service.task.SocketTask;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.FormBody;
+import okhttp3.RequestBody;
 
 public class SessionActivity extends AppCompatActivity {
 
@@ -112,6 +118,13 @@ public class SessionActivity extends AppCompatActivity {
             msgList.add(new Msg(message.getContent(), messageType));
             adapter.notifyItemInserted(msgList.size() - 1);
             msgRecyclerView.scrollToPosition(msgList.size() - 1);
+
+            //清理当前会话持有者的未读消息
+            Intent clearUnreadIntent = new Intent(MyApplication.getCurrentActivity(), ClearUnreadService.class)
+                    .putExtra("url", Constants.DefaultBasicUrl.getValue() + "/session/clear/unread")
+                    .putExtra("userId", userId)
+                    .putExtra("toUserId", toUserId);
+            MyApplication.getCurrentActivity().startService(clearUnreadIntent);
         }
     }
 
