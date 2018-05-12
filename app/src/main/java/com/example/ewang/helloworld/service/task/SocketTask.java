@@ -23,7 +23,7 @@ import java.net.Socket;
  * Created by ewang on 2018/5/8.
  */
 
-public class SocketTask extends AsyncTask<Object, Msg, Boolean> {
+public class SocketTask extends AsyncTask<Object, Message, Boolean> {
 
     private Socket socket;
 
@@ -47,9 +47,10 @@ public class SocketTask extends AsyncTask<Object, Msg, Boolean> {
             bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(),
                     Constants.CharsetName.getValue()));
 
-            String msg;
-            while ((msg = readFromServer()) != null) {
-                publishProgress(new Msg(msg, Msg.TYPE_RECEIVED));
+            String msgJson;
+            while ((msgJson = readFromServer()) != null) {
+                Message message = JsonHelper.decode(msgJson, Message.class);
+                publishProgress(message);
             }
 
             if (EventBus.getDefault().isRegistered(this)) {
@@ -63,8 +64,9 @@ public class SocketTask extends AsyncTask<Object, Msg, Boolean> {
     }
 
     @Override
-    protected void onProgressUpdate(Msg... values) {
-        SessionActivity.notifyNewMsg(values[0]);
+    protected void onProgressUpdate(Message... values) {
+        //TODO 插入本地数据库/缓存
+        SessionActivity.notifyNewMsg(values[0], Msg.TYPE_RECEIVED);
         super.onProgressUpdate(values);
     }
 

@@ -34,6 +34,10 @@ public class SessionActivity extends AppCompatActivity {
 
     private static List<Msg> msgList = new ArrayList<>();
 
+    static long userId;
+
+    static long toUserId;
+
     private EditText editText;
 
     private Button sendBtn;
@@ -51,10 +55,11 @@ public class SessionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_session);
         MyApplication.setCurrentActivity(this);
 
-        long toUserId = getIntent().getLongExtra("toUserId", 0);
+        toUserId = getIntent().getLongExtra("toUserId", 0);
         String toUsername = getIntent().getStringExtra("toUsername");
 
         User user = MyApplication.getCurrentUser();
+        userId = user.getId();
 
         editText = findViewById(R.id.input_text);
         sendBtn = findViewById(R.id.btn_send);
@@ -68,7 +73,7 @@ public class SessionActivity extends AppCompatActivity {
 
         Intent showMessagesIntent = new Intent(SessionActivity.this, ShowMessagesService.class)
                 .putExtra("url", Constants.DefaultBasicUrl.getValue() + "/session/message/get")
-                .putExtra("userId", user.getId())
+                .putExtra("userId", userId)
                 .putExtra("toUserId", toUserId);
         startService(showMessagesIntent);
 
@@ -87,7 +92,7 @@ public class SessionActivity extends AppCompatActivity {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                    setSendListener(user.getId(), toUserId);
+                    setSendListener(userId, toUserId);
                     return true;
                 }
                 return false;
@@ -101,10 +106,13 @@ public class SessionActivity extends AppCompatActivity {
         socketTask.closeSocket();
     }
 
-    public static void notifyNewMsg(Msg msg) {
-        msgList.add(msg);
-        adapter.notifyItemInserted(msgList.size() - 1);
-        msgRecyclerView.scrollToPosition(msgList.size() - 1);
+    public static void notifyNewMsg(Message message, int messageType) {
+        if ((message.getUserId() == toUserId && messageType == Msg.TYPE_RECEIVED) ||
+                (message.getUserId() == userId && messageType == Msg.TYPE_SENT)) {
+            msgList.add(new Msg(message.getContent(), messageType));
+            adapter.notifyItemInserted(msgList.size() - 1);
+            msgRecyclerView.scrollToPosition(msgList.size() - 1);
+        }
     }
 
     public static void setAdapter(List<Msg> msgs) {
@@ -120,8 +128,6 @@ public class SessionActivity extends AppCompatActivity {
             return;
         }
 
-        Message m = new Message(0, userId, toUserId, content, 0, 0);
-
         Intent sendMessageIntent = new Intent(SessionActivity.this, SendMessageService.class)
                 .putExtra("url", Constants.DefaultBasicUrl.getValue() + "/session/message/send")
                 .putExtra("content", content)
@@ -129,10 +135,11 @@ public class SessionActivity extends AppCompatActivity {
                 .putExtra("toUserId", toUserId);
         startService(sendMessageIntent);
 
-        EventBus.getDefault().post(m);
+        EventBus.getDefault().post(new Message(0, userId, toUserId, content, 0, 0));
 
-        Msg msg = new Msg(content, Msg.TYPE_SENT);
-        notifyNewMsg(msg);
+        //TODO 插入本地数据库/缓存
+        Message message = new Message(0, userId, toUserId, content, 0, 0);
+        notifyNewMsg(message, Msg.TYPE_SENT);
         editText.setText("");
     }
 
