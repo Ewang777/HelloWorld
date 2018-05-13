@@ -24,6 +24,8 @@ public class LoginService extends Service {
 
     ProgressDialog progressDialog;
 
+    public static SocketTask socketTask;
+
     ResponseListener responseListener = new ResponseListener() {
         @Override
         public void onSuccess(ResponseWrapper responseWrapper) {
@@ -35,7 +37,7 @@ public class LoginService extends Service {
             editor.apply();
             MyApplication.setCurrentUser(currentUser);
 
-            SocketTask socketTask = new SocketTask();
+            socketTask = new SocketTask();
             socketTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, currentUser.getId());
 
             progressDialog.dismiss();

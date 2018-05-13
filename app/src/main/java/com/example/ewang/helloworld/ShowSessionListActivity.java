@@ -14,6 +14,7 @@ import com.example.ewang.helloworld.client.Constants;
 import com.example.ewang.helloworld.helper.MyApplication;
 import com.example.ewang.helloworld.model.Session;
 import com.example.ewang.helloworld.model.User;
+import com.example.ewang.helloworld.service.LoginService;
 import com.example.ewang.helloworld.service.ShowFriendsService;
 
 import java.util.List;
@@ -65,9 +66,16 @@ public class ShowSessionListActivity extends AppCompatActivity {
         setMessageAdapter(user);
     }
 
+    //app退出要即使关闭socket的线程
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onDestroy() {
+        super.onDestroy();
+        LoginService.socketTask.closeSocket();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
         MyApplication.setCurrentActivity(this);
         setMessageAdapter(user);
     }

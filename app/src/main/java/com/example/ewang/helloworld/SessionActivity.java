@@ -94,19 +94,24 @@ public class SessionActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.i("SessionActivity", "onPause");
+        //清理当前会话持有者的未读消息
+        Intent clearUnreadIntent = new Intent(MyApplication.getCurrentActivity(), ClearUnreadService.class)
+                .putExtra("url", Constants.DefaultBasicUrl.getValue() + "/session/clear/unread")
+                .putExtra("userId", userId)
+                .putExtra("toUserId", toUserId);
+        MyApplication.getCurrentActivity().startService(clearUnreadIntent);
+    }
+
     public static void notifyNewMsg(Message message, int messageType) {
         if ((message.getUserId() == toUserId && messageType == Msg.TYPE_RECEIVED) ||
                 (message.getUserId() == userId && messageType == Msg.TYPE_SENT)) {
             msgList.add(new Msg(message.getContent(), messageType));
             adapter.notifyItemInserted(msgList.size() - 1);
             msgRecyclerView.scrollToPosition(msgList.size() - 1);
-
-            //清理当前会话持有者的未读消息
-            Intent clearUnreadIntent = new Intent(MyApplication.getCurrentActivity(), ClearUnreadService.class)
-                    .putExtra("url", Constants.DefaultBasicUrl.getValue() + "/session/clear/unread")
-                    .putExtra("userId", userId)
-                    .putExtra("toUserId", toUserId);
-            MyApplication.getCurrentActivity().startService(clearUnreadIntent);
         }
     }
 

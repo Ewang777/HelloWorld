@@ -52,25 +52,27 @@ public class LoginActivity extends AppCompatActivity {
 
                 account = editAccount.getText().toString().trim();
                 password = editPwd.getText().toString().trim();
-                judgeParameters(account, password);
 
-                Intent loginIntent = new Intent(LoginActivity.this, LoginService.class)
-                        .putExtra("url", requestUrl)
-                        .putExtra("account", account)
-                        .putExtra("password", password);
-                startService(loginIntent);
+                if (judgeParameters(account, password)) {
+                    Intent loginIntent = new Intent(LoginActivity.this, LoginService.class)
+                            .putExtra("url", requestUrl)
+                            .putExtra("account", account)
+                            .putExtra("password", password);
+                    startService(loginIntent);
+                }
 
             }
         });
     }
 
-    void judgeParameters(String account, String pwd) {
+    boolean judgeParameters(String account, String pwd) {
         if (account.isEmpty() || null == account || pwd.isEmpty() || null == pwd) {
             DialogHelper.showAlertDialog(LoginActivity.this, "Warning", "用户名或密码不得为空", (dialogInterface, i) -> {
                 editAccount.setText("");
                 editPwd.setText("");
             }, null);
-
+            return false;
         }
+        return true;
     }
 }
