@@ -80,6 +80,11 @@ public class ShowSessionListActivity extends AppCompatActivity {
         setMessageAdapter(user);
     }
 
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
+    }
+
     void setMessageAdapter(User user) {
         Intent showFriendsIntent = new Intent(ShowSessionListActivity.this, ShowFriendsService.class)
                 .putExtra("url", Constants.DefaultBasicUrl.getValue() + "/session/get")
