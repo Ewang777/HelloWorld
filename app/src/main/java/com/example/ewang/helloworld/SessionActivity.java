@@ -1,7 +1,6 @@
 package com.example.ewang.helloworld;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,25 +17,17 @@ import com.example.ewang.helloworld.client.Constants;
 import com.example.ewang.helloworld.helper.MyApplication;
 import com.example.ewang.helloworld.model.Message;
 import com.example.ewang.helloworld.model.Msg;
-import com.example.ewang.helloworld.model.Session;
 import com.example.ewang.helloworld.model.User;
 import com.example.ewang.helloworld.service.ClearUnreadService;
 import com.example.ewang.helloworld.service.SendMessageService;
 import com.example.ewang.helloworld.service.ShowMessagesService;
-import com.example.ewang.helloworld.service.task.RequestTask;
-import com.example.ewang.helloworld.service.task.SocketTask;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import okhttp3.FormBody;
-import okhttp3.RequestBody;
-
 public class SessionActivity extends AppCompatActivity {
-
-    private SocketTask socketTask;
 
     private static List<Msg> msgList = new ArrayList<>();
 
@@ -83,9 +74,6 @@ public class SessionActivity extends AppCompatActivity {
                 .putExtra("toUserId", toUserId);
         startService(showMessagesIntent);
 
-        socketTask = new SocketTask();
-        socketTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, user.getId());
-
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -104,12 +92,6 @@ public class SessionActivity extends AppCompatActivity {
                 return false;
             }
         });
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        socketTask.closeSocket();
     }
 
     public static void notifyNewMsg(Message message, int messageType) {

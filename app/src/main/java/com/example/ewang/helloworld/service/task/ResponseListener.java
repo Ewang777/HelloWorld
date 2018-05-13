@@ -10,9 +10,11 @@ import com.example.ewang.helloworld.helper.ResponseWrapper;
 
 public interface ResponseListener {
 
-    void onSuccess(ResponseWrapper responseWrapper);
+    default void onSuccess(ResponseWrapper responseWrapper) {
+    }
 
     default void onFail(String errMessage) {
+        errMessage = errMessage == null ? "连接服务器异常" : errMessage;
         DialogHelper.showAlertDialog(MyApplication.getCurrentActivity(), "Warning", errMessage, null, null);
     }
 }

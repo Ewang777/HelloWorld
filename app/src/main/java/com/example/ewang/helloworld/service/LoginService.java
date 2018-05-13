@@ -15,6 +15,7 @@ import com.example.ewang.helloworld.helper.ResponseWrapper;
 import com.example.ewang.helloworld.model.User;
 import com.example.ewang.helloworld.service.task.RequestTask;
 import com.example.ewang.helloworld.service.task.ResponseListener;
+import com.example.ewang.helloworld.service.task.SocketTask;
 
 import okhttp3.FormBody;
 import okhttp3.RequestBody;
@@ -33,6 +34,9 @@ public class LoginService extends Service {
             editor.putString("password", currentUser.getPassword());
             editor.apply();
             MyApplication.setCurrentUser(currentUser);
+
+            SocketTask socketTask = new SocketTask();
+            socketTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, currentUser.getId());
 
             progressDialog.dismiss();
             MyApplication.getCurrentActivity().finish();

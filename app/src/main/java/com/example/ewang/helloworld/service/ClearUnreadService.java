@@ -15,9 +15,6 @@ import okhttp3.RequestBody;
 public class ClearUnreadService extends Service {
 
     ResponseListener responseListener = new ResponseListener() {
-        @Override
-        public void onSuccess(ResponseWrapper responseWrapper) {
-        }
     };
 
     @Override

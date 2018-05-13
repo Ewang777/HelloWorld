@@ -68,6 +68,7 @@ public class ShowSessionListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        MyApplication.setCurrentActivity(this);
         setMessageAdapter(user);
     }
 
@@ -85,5 +86,13 @@ public class ShowSessionListActivity extends AppCompatActivity {
         sessionMap = mSessionMap;
         adapter = new SessionAdapter(userList, messageMap, sessionMap);
         friendRecyclerView.setAdapter(adapter);
+    }
+
+    public static void notifyNewMsg(Long userId, String msgContent) {
+        Session oldSession = sessionMap.get(userId);
+        sessionMap.put(userId, new Session(oldSession.getId(), oldSession.getUserId(), oldSession.getToUserId(),
+                oldSession.getCreateTime().getTime(), oldSession.getUpdateTime().getTime(), oldSession.getUnread() + 1));
+        messageMap.put(userId, msgContent);
+        adapter.notifyDataSetChanged();
     }
 }

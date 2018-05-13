@@ -4,8 +4,10 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.example.ewang.helloworld.SessionActivity;
+import com.example.ewang.helloworld.ShowSessionListActivity;
 import com.example.ewang.helloworld.client.Constants;
 import com.example.ewang.helloworld.helper.JsonHelper;
+import com.example.ewang.helloworld.helper.MyApplication;
 import com.example.ewang.helloworld.model.Message;
 import com.example.ewang.helloworld.model.Msg;
 
@@ -18,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Objects;
 
 /**
  * Created by ewang on 2018/5/8.
@@ -66,7 +69,12 @@ public class SocketTask extends AsyncTask<Object, Message, Boolean> {
     @Override
     protected void onProgressUpdate(Message... values) {
         //TODO 插入本地数据库/缓存
-        SessionActivity.notifyNewMsg(values[0], Msg.TYPE_RECEIVED);
+        Message m = values[0];
+        if (MyApplication.getCurrentActivity() instanceof SessionActivity) {
+            SessionActivity.notifyNewMsg(m, Msg.TYPE_RECEIVED);
+        } else if (MyApplication.getCurrentActivity() instanceof ShowSessionListActivity) {
+            ShowSessionListActivity.notifyNewMsg(m.getUserId(), m.getContent());
+        }
         super.onProgressUpdate(values);
     }
 
@@ -82,6 +90,7 @@ public class SocketTask extends AsyncTask<Object, Message, Boolean> {
         try {
             socket.close();
             bufferedReader.close();
+            outputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
             Log.d("fail:", "in closing socket");
