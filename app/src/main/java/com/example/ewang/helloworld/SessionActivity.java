@@ -111,7 +111,7 @@ public class SessionActivity extends BaseActivity {
 
     void showMessages() {
         Intent showMessagesIntent = new Intent(SessionActivity.this, ShowMessagesService.class)
-                .putExtra("url", Constants.DefaultBasicUrl.getValue() + "/session/message/get")
+                .putExtra("url", Constants.DefaultBasicUrl.getValue() + "/session/message/find")
                 .putExtra("userId", userId)
                 .putExtra("toUserId", toUserId);
         startService(showMessagesIntent);

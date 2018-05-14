@@ -85,7 +85,7 @@ public class ShowSessionListActivity extends BaseActivity {
 
     void setMessageAdapter(User user) {
         Intent showFriendsIntent = new Intent(ShowSessionListActivity.this, ShowFriendsService.class)
-                .putExtra("url", Constants.DefaultBasicUrl.getValue() + "/session/get")
+                .putExtra("url", Constants.DefaultBasicUrl.getValue() + "/session/find")
                 .putExtra("userId", user.getId());
         startService(showFriendsIntent);
 
