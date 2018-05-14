@@ -1,7 +1,6 @@
 package com.example.ewang.helloworld;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,11 +12,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.ewang.helloworld.adapter.MsgAdapter;
-import com.example.ewang.helloworld.client.Constants;
+import com.example.ewang.helloworld.helper.CustomActivityManager;
+import com.example.ewang.helloworld.model.Constants;
 import com.example.ewang.helloworld.helper.MyApplication;
 import com.example.ewang.helloworld.model.Message;
 import com.example.ewang.helloworld.model.Msg;
 import com.example.ewang.helloworld.model.User;
+import com.example.ewang.helloworld.service.BaseActivity;
 import com.example.ewang.helloworld.service.ClearUnreadService;
 import com.example.ewang.helloworld.service.SendMessageService;
 import com.example.ewang.helloworld.service.ShowMessagesService;
@@ -27,13 +28,15 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SessionActivity extends AppCompatActivity {
+public class SessionActivity extends BaseActivity {
 
     private static List<Msg> msgList = new ArrayList<>();
 
     static long userId;
 
     static long toUserId;
+
+    static String toUsername;
 
     private EditText editText;
 
@@ -50,10 +53,9 @@ public class SessionActivity extends AppCompatActivity {
         Log.d("Session", "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session);
-        MyApplication.setCurrentActivity(this);
 
         toUserId = getIntent().getLongExtra("toUserId", 0);
-        String toUsername = getIntent().getStringExtra("toUsername");
+        toUsername = getIntent().getStringExtra("toUsername");
 
         User user = MyApplication.getCurrentUser();
         userId = user.getId();
@@ -68,11 +70,7 @@ public class SessionActivity extends AppCompatActivity {
         linearLayoutManager = new LinearLayoutManager(SessionActivity.this);
         msgRecyclerView.setLayoutManager(linearLayoutManager);
 
-        Intent showMessagesIntent = new Intent(SessionActivity.this, ShowMessagesService.class)
-                .putExtra("url", Constants.DefaultBasicUrl.getValue() + "/session/message/get")
-                .putExtra("userId", userId)
-                .putExtra("toUserId", toUserId);
-        startService(showMessagesIntent);
+        showMessages();
 
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,13 +95,26 @@ public class SessionActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        Log.i("SessionActivity", "onPause");
         //清理当前会话持有者的未读消息
-        Intent clearUnreadIntent = new Intent(MyApplication.getCurrentActivity(), ClearUnreadService.class)
+        Intent clearUnreadIntent = new Intent(CustomActivityManager.getInstance().getCurrentActivity(), ClearUnreadService.class)
                 .putExtra("url", Constants.DefaultBasicUrl.getValue() + "/session/clear/unread")
                 .putExtra("userId", userId)
                 .putExtra("toUserId", toUserId);
-        MyApplication.getCurrentActivity().startService(clearUnreadIntent);
+        CustomActivityManager.getInstance().getCurrentActivity().startService(clearUnreadIntent);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        showMessages();
+    }
+
+    void showMessages() {
+        Intent showMessagesIntent = new Intent(SessionActivity.this, ShowMessagesService.class)
+                .putExtra("url", Constants.DefaultBasicUrl.getValue() + "/session/message/get")
+                .putExtra("userId", userId)
+                .putExtra("toUserId", toUserId);
+        startService(showMessagesIntent);
     }
 
     public static void notifyNewMsg(Message message, int messageType) {
@@ -135,10 +146,10 @@ public class SessionActivity extends AppCompatActivity {
                 .putExtra("toUserId", toUserId);
         startService(sendMessageIntent);
 
-        EventBus.getDefault().post(new Message(0, userId, toUserId, content, 0, 0));
+        Message message = new Message(userId, toUserId, content, MyApplication.getCurrentUser().getUsername(), toUsername);
 
         //TODO 插入本地数据库/缓存
-        Message message = new Message(0, userId, toUserId, content, 0, 0);
+        EventBus.getDefault().post(message);
         notifyNewMsg(message, Msg.TYPE_SENT);
         editText.setText("");
     }

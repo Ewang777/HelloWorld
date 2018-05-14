@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 
 import com.example.ewang.helloworld.ShowSessionListActivity;
+import com.example.ewang.helloworld.helper.CustomActivityManager;
 import com.example.ewang.helloworld.helper.DialogHelper;
 import com.example.ewang.helloworld.helper.JsonHelper;
 import com.example.ewang.helloworld.helper.MyApplication;
@@ -41,8 +42,8 @@ public class LoginService extends Service {
             socketTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, currentUser.getId());
 
             progressDialog.dismiss();
-            MyApplication.getCurrentActivity().finish();
-            Intent intent = new Intent(MyApplication.getCurrentActivity(), ShowSessionListActivity.class);
+            CustomActivityManager.getInstance().getCurrentActivity().finish();
+            Intent intent = new Intent(CustomActivityManager.getInstance().getCurrentActivity(), ShowSessionListActivity.class);
             startActivity(intent);
         }
 
@@ -50,13 +51,13 @@ public class LoginService extends Service {
         public void onFail(String errMessage) {
             progressDialog.dismiss();
             errMessage = errMessage == null ? "连接服务器异常" : errMessage;
-            DialogHelper.showAlertDialog(MyApplication.getCurrentActivity(), "Warning", errMessage, null, null);
+            DialogHelper.showAlertDialog(CustomActivityManager.getInstance().getCurrentActivity(), "Warning", errMessage, null, null);
         }
     };
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        progressDialog = DialogHelper.showProgressDialog(MyApplication.getCurrentActivity(), "请稍侯", "loading", null);
+        progressDialog = DialogHelper.showProgressDialog(CustomActivityManager.getInstance().getCurrentActivity(), "请稍侯", "loading", null);
         String url = intent.getStringExtra("url");
         RequestBody requestBody = new FormBody.Builder()
                 .add("account", intent.getStringExtra("account"))

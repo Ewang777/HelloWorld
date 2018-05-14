@@ -1,11 +1,20 @@
 package com.example.ewang.helloworld.service.task;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.example.ewang.helloworld.R;
 import com.example.ewang.helloworld.SessionActivity;
 import com.example.ewang.helloworld.ShowSessionListActivity;
-import com.example.ewang.helloworld.client.Constants;
+import com.example.ewang.helloworld.helper.CustomActivityManager;
+import com.example.ewang.helloworld.model.Constants;
 import com.example.ewang.helloworld.helper.JsonHelper;
 import com.example.ewang.helloworld.helper.MyApplication;
 import com.example.ewang.helloworld.model.Message;
@@ -20,7 +29,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Objects;
 
 /**
  * Created by ewang on 2018/5/8.
@@ -33,6 +41,8 @@ public class SocketTask extends AsyncTask<Object, Message, Boolean> {
     private OutputStream outputStream;
 
     private BufferedReader bufferedReader;
+
+    private int notificationId = 0;
 
     @Override
     protected Boolean doInBackground(Object... objects) {
@@ -68,14 +78,38 @@ public class SocketTask extends AsyncTask<Object, Message, Boolean> {
 
     @Override
     protected void onProgressUpdate(Message... values) {
+        super.onProgressUpdate(values);
         //TODO 插入本地数据库/缓存
         Message m = values[0];
-        if (MyApplication.getCurrentActivity() instanceof SessionActivity) {
-            SessionActivity.notifyNewMsg(m, Msg.TYPE_RECEIVED);
-        } else if (MyApplication.getCurrentActivity() instanceof ShowSessionListActivity) {
-            ShowSessionListActivity.notifyNewMsg(m.getUserId(), m.getContent());
+        if (!CustomActivityManager.getInstance().isAppForeground()) {
+            openNotification(MyApplication.getContext(), m.getUserId(), m.getUsername(), m.getContent());
+            return;
+        } else {
+            if (CustomActivityManager.getInstance().getCurrentActivity() instanceof SessionActivity) {
+                SessionActivity.notifyNewMsg(m, Msg.TYPE_RECEIVED);
+            } else if (CustomActivityManager.getInstance().getCurrentActivity() instanceof ShowSessionListActivity) {
+                ShowSessionListActivity.notifyNewMsg(m.getUserId(), m.getContent());
+            }
         }
-        super.onProgressUpdate(values);
+    }
+
+    void openNotification(Context context, long userId, String username, String message) {
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        Intent intent = new Intent(context, CustomActivityManager.getInstance().getCurrentActivity().getClass())
+                .setFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+        Notification notification = new NotificationCompat.Builder(context)
+                .setContentTitle(username)
+                .setContentText(message.length() < 20 ? message : message.substring(0, 20) + "...")
+                .setWhen(System.currentTimeMillis())
+                .setSmallIcon(R.drawable.logo)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.logo))
+                .setContentIntent(pendingIntent)
+                .setVibrate(new long[]{0, 500})
+                .build();
+        notificationManager.notify(String.valueOf(userId), (int) System.currentTimeMillis(), notification);
     }
 
     public String readFromServer() {

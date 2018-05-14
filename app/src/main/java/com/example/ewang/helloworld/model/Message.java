@@ -3,14 +3,11 @@ package com.example.ewang.helloworld.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.Date;
-
 /**
  * Created by ewang on 2018/4/21.
  */
 
 public class Message {
-    private final long id;
 
     private final long userId;
 
@@ -18,27 +15,21 @@ public class Message {
 
     private final String content;
 
-    private final long sessionId;
+    private final String username;
 
-    private final Date createTime;
+    private final String toUsername;
 
     @JsonCreator
-    public Message(@JsonProperty("id") long id,
-                   @JsonProperty("userId") long userId,
+    public Message(@JsonProperty("userId") long userId,
                    @JsonProperty("toUserId") long toUserId,
                    @JsonProperty("content") String content,
-                   @JsonProperty("sessionId") long sessionId,
-                   @JsonProperty("createTime") long createTime) {
-        this.id = id;
+                   @JsonProperty("username") String username,
+                   @JsonProperty("toUsername") String toUsername) {
         this.userId = userId;
         this.toUserId = toUserId;
         this.content = content;
-        this.sessionId = sessionId;
-        this.createTime = new Date(createTime);
-    }
-
-    public long getId() {
-        return id;
+        this.username = username;
+        this.toUsername = toUsername;
     }
 
     public long getUserId() {
@@ -53,11 +44,11 @@ public class Message {
         return content;
     }
 
-    public long getSessionId() {
-        return sessionId;
+    public String getUsername() {
+        return username;
     }
 
-    public Date getCreateTime() {
-        return createTime;
+    public String getToUsername() {
+        return toUsername;
     }
 }

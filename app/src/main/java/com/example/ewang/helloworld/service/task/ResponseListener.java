@@ -1,7 +1,7 @@
 package com.example.ewang.helloworld.service.task;
 
+import com.example.ewang.helloworld.helper.CustomActivityManager;
 import com.example.ewang.helloworld.helper.DialogHelper;
-import com.example.ewang.helloworld.helper.MyApplication;
 import com.example.ewang.helloworld.helper.ResponseWrapper;
 
 /**
@@ -15,6 +15,6 @@ public interface ResponseListener {
 
     default void onFail(String errMessage) {
         errMessage = errMessage == null ? "连接服务器异常" : errMessage;
-        DialogHelper.showAlertDialog(MyApplication.getCurrentActivity(), "Warning", errMessage, null, null);
+        DialogHelper.showAlertDialog(CustomActivityManager.getInstance().getCurrentActivity(), "Warning", errMessage, null, null);
     }
 }

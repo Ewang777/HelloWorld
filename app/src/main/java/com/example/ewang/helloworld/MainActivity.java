@@ -1,14 +1,13 @@
 package com.example.ewang.helloworld;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-import com.example.ewang.helloworld.helper.MyApplication;
+import com.example.ewang.helloworld.service.BaseActivity;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     static final int request_login = 0;
     static final int request_reg = 1;
@@ -17,7 +16,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        MyApplication.setCurrentActivity(this);
 
         Button btnLogin = findViewById(R.id.btn_login);
         Button btnReg = findViewById(R.id.btn_reg);
@@ -25,7 +23,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnLogin.setOnClickListener(this);
         btnReg.setOnClickListener(this);
     }
-
 
     @Override
     public void onClick(View view) {

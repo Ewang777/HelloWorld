@@ -1,4 +1,4 @@
-package com.example.ewang.helloworld.client;
+package com.example.ewang.helloworld.model;
 
 import java.util.Collections;
 import java.util.HashMap;

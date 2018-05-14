@@ -1,19 +1,18 @@
 package com.example.ewang.helloworld;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.example.ewang.helloworld.client.Constants;
+import com.example.ewang.helloworld.model.Constants;
 import com.example.ewang.helloworld.helper.DialogHelper;
-import com.example.ewang.helloworld.helper.MyApplication;
+import com.example.ewang.helloworld.service.BaseActivity;
 import com.example.ewang.helloworld.service.LoginService;
 
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends BaseActivity {
 
     String account;
 
@@ -30,7 +29,6 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        MyApplication.setCurrentActivity(this);
 
         btnSure = findViewById(R.id.btn_sure);
         editAccount = findViewById(R.id.edit_account);

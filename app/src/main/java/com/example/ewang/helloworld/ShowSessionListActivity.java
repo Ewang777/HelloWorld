@@ -2,7 +2,6 @@ package com.example.ewang.helloworld;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,17 +9,18 @@ import android.view.View;
 import android.widget.Button;
 
 import com.example.ewang.helloworld.adapter.SessionAdapter;
-import com.example.ewang.helloworld.client.Constants;
+import com.example.ewang.helloworld.model.Constants;
 import com.example.ewang.helloworld.helper.MyApplication;
 import com.example.ewang.helloworld.model.Session;
 import com.example.ewang.helloworld.model.User;
+import com.example.ewang.helloworld.service.BaseActivity;
 import com.example.ewang.helloworld.service.LoginService;
 import com.example.ewang.helloworld.service.ShowFriendsService;
 
 import java.util.List;
 import java.util.Map;
 
-public class ShowSessionListActivity extends AppCompatActivity {
+public class ShowSessionListActivity extends BaseActivity {
 
     private Button btnOff;
 
@@ -40,7 +40,6 @@ public class ShowSessionListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_friends);
-        MyApplication.setCurrentActivity(this);
 
         btnOff = findViewById(R.id.btn_off);
         friendRecyclerView = findViewById(R.id.friend_recycler_view);
@@ -74,9 +73,8 @@ public class ShowSessionListActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onRestart() {
-        super.onRestart();
-        MyApplication.setCurrentActivity(this);
+    protected void onResume() {
+        super.onResume();
         setMessageAdapter(user);
     }
 
